@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Author;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class BookManagementTest extends TestCase
+class BookCrudTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -26,18 +27,13 @@ class BookManagementTest extends TestCase
         $this->assertDatabaseCount("books", 1);
     }
 
-    public function testCannotCreateBookWithEmptyTitle()
-    {
-        $response = $this->post("/books", $this->data(["title" => ""]));
-        $response->assertSessionHasErrors(["title" => "title is required"]);
-    }
-
     private function data($data = [])
     {
+        $author = Author::factory()->create();
         $default = [
             "title" => "Gone with the Wind",
             "description" => "Bestseller of New York Times",
-            "author_id" => 1,
+            "author_id" => $author->id,
             "ISBN" => "12b-422-24ff"
         ];
         return array_merge($default, $data);
