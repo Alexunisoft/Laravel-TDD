@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,9 +10,14 @@ class BookValidationTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * @var \Illuminate\Database\Eloquent\Collection|\Illuminate\Database\Eloquent\Model|mixed
+     */
+    private $user;
+
     public function testCannotCreateBookWithEmptyTitle()
     {
-        $response = $this->post("/books", $this->data(["title" => ""]));
+        $response = $this->actingAs($this->user)->post("/books", $this->data(["title" => ""]));
         $response->assertSessionHasErrors(["title" => "title is required"]);
     }
 
@@ -28,25 +34,31 @@ class BookValidationTest extends TestCase
 
     public function testDescriptionIsRequired()
     {
-        $response = $this->post("/books", $this->data(["description" => ""]));
+        $response = $this->actingAs($this->user)->post("/books", $this->data(["description" => ""]));
         $response->assertSessionHasErrors(["description" => "description is required"]);
     }
 
     public function testDescriptionLengthMinimumIs20Characters()
     {
-        $response = $this->post("/books", $this->data(["description" => "ddd"]));
+        $response = $this->actingAs($this->user)->post("/books", $this->data(["description" => "ddd"]));
         $response->assertSessionHasErrors(["description" => "description length minimum is 20"]);
     }
 
     public function testAuthorIdMustBeValid()
     {
-        $response = $this->post("/books", $this->data());
+        $response = $this->actingAs($this->user)->post("/books", $this->data());
         $response->assertSessionHasErrors(["author_id" => "Author must be valid"]);
     }
 
     public function testIsbnMustBeOfValidFormat()
     {
-        $response = $this->post("/books", $this->data(["ISBN" => "asfgawer"]));
+        $response = $this->actingAs($this->user)->post("/books", $this->data(["ISBN" => "asfgawer"]));
         $response->assertSessionHasErrors(["ISBN" => "ISBN must be of valid format"]);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
     }
 }

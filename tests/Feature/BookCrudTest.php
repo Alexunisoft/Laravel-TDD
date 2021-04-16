@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Author;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,15 +17,12 @@ class BookCrudTest extends TestCase
      */
     private $response;
 
-    public function testStatus201WithMessageCreatedWhenCreateABook()
+    public function testStatus201WithMessageCreatedWhenCreateABookWhenAuthenticated()
     {
-        $this->response->assertCreated();
-        $this->response->assertJson(["message" => "Created"]);
-    }
-
-    public function testCountOfDatabaseInBooksTableIs1()
-    {
-        $this->assertDatabaseCount("books", 1);
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)->post("/books", $this->data());
+        $response->assertCreated();
+        $response->assertJson(["message" => "Created"]);
     }
 
     private function data($data = [])
@@ -39,9 +37,24 @@ class BookCrudTest extends TestCase
         return array_merge($default, $data);
     }
 
-    protected function setUp(): void
+    public function testRedirectToLoginIfNotAuthenticatedWith302Status()
     {
-        parent::setUp();
-        $this->response = $this->post("/books", $this->data());
+        $response = $this->post("/books", $this->data());
+        $response->assertStatus(302);
+        $response->assertRedirect("/login");
+    }
+
+    public function testCountOfDatabaseInBooksTableIs1()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user)->post("/books", $this->data());
+        $this->assertDatabaseCount("books", 1);
+    }
+
+    public function testAssertValidatedCookieExistsAfterVisitingBooksRoute()
+    {
+        $user = User::factory()->create();
+        $response = $this->actingAs($user)->post("/books", $this->data());
+        $response->assertCookie("validated", "yes");
     }
 }
