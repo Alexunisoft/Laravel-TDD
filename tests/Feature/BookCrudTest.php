@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Author;
 use App\Models\User;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -60,6 +59,25 @@ class BookCrudTest extends TestCase
     {
         $response = $this->actingAs($this->user)->post("/books", $this->data());
         $response->assertCookie("validated", "yes");
+    }
+
+    public function testLibrarianCanSeeBookCreationForm()
+    {
+        $this->withoutExceptionHandling();
+
+        $user = $this->user;
+        $user->role = "Librarian";
+        $res = $this->actingAs($user)->get("/books/create");
+        $res->assertOk();
+        $res->assertViewIs("book_creation");
+    }
+
+    public function testNonLibrarianCannotSeeBookCreationForm()
+    {
+        $user = $this->user;
+        $user->role = "non-librarian";
+        $res = $this->actingAs($user)->get("/books/create");
+        $res->assertForbidden();
     }
 
     protected function setUp(): void

@@ -18,4 +18,9 @@ class BooksController extends Controller
         ]);
         return response(["message" => "Created"], 201);
     }
+
+    public function create()
+    {
+        return view("book_creation");
+    }
 }
