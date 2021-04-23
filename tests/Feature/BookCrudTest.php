@@ -4,23 +4,29 @@ namespace Tests\Feature;
 
 use App\Models\Author;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class BookCrudTest extends TestCase
 {
     use RefreshDatabase;
 
-
     /**
-     * @var \Illuminate\Testing\TestResponse
+     * @var TestResponse
      */
     private $response;
+    /**
+     * @var Collection|Model|mixed
+     */
+    private $user;
 
     public function testStatus201WithMessageCreatedWhenCreateABookWhenAuthenticated()
     {
-        $user = User::factory()->create();
-        $response = $this->actingAs($user)->post("/books", $this->data());
+        $response = $this->actingAs($this->user)->post("/books", $this->data());
         $response->assertCreated();
         $response->assertJson(["message" => "Created"]);
     }
@@ -46,15 +52,19 @@ class BookCrudTest extends TestCase
 
     public function testCountOfDatabaseInBooksTableIs1()
     {
-        $user = User::factory()->create();
-        $this->actingAs($user)->post("/books", $this->data());
+        $this->actingAs($this->user)->post("/books", $this->data());
         $this->assertDatabaseCount("books", 1);
     }
 
     public function testAssertValidatedCookieExistsAfterVisitingBooksRoute()
     {
-        $user = User::factory()->create();
-        $response = $this->actingAs($user)->post("/books", $this->data());
+        $response = $this->actingAs($this->user)->post("/books", $this->data());
         $response->assertCookie("validated", "yes");
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
     }
 }
