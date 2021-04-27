@@ -28,3 +28,7 @@ Route::post("/books", [BooksController::class, "store"])->middleware(["auth", "v
 
 Route::get("/books/create", [BooksController::class, "create"])
     ->middleware("can:create,App\Models\Book");
+
+Route::get("demo", function () {
+    return \App\Facades\Char::getCamelCase("call_of_duty");
+});
