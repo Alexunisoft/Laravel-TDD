@@ -3,11 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\BookRequest;
+use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\Request;
 
 class BooksController extends Controller
 {
+    public function index()
+    {
+        return response()
+            ->json(["books" => BookResource::collection(Book::all())]);
+    }
+
     public function store(BookRequest $request)
     {
         Book::create([
