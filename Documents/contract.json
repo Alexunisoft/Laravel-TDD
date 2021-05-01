@@ -1,0 +1,18 @@
+{
+    "books": [
+        {
+            "book_id": 1,
+            "book_title": "PS, I love you",
+            "book_description": "Changes happen all the time. This book tells you how to cook Falafel",
+            "author_name": "John Sims",
+            "ISBN": "24d-28f-211c"
+        },
+        {
+            "book_id": 2,
+            "book_title": "Gone with the Wind",
+            "book_description": "This is the greatest book of all times",
+            "author_name": "Cameron Marronee",
+            "ISBN": "4sh-58h-214c"
+        }
+    ]
+}
